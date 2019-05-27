@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 
 from utils import process_order, insert_row
 
+
 # CONFIG
 app = Flask(__name__)
 app.config.from_pyfile('application.cfg')
@@ -81,8 +82,13 @@ def upload_file():
 
                 if not previous_order:
                     insert_row(db.session, Customer(**customer), app.logger)
+                    db.session.commit()
+
                     insert_row(db.session, Product(**product), app.logger)
+                    db.session.commit()
+
                     insert_row(db.session, OrderStatus(**order_status), app.logger)
+                    db.session.commit()
 
                 else:
                     order = OrderStatus.query.filter_by(status='new', **previous_order).first()
@@ -93,7 +99,7 @@ def upload_file():
                     else:
                         app.logger.warn('Unable to load row: {}'.format(order_status))
 
-                db.session.commit()
+                    db.session.commit()
 
         return redirect(url_for('uploaded_file', filename=filename))
 
